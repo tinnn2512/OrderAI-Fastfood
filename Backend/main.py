@@ -141,15 +141,17 @@ def complete_order(parameters: dict, session_id: str):
     if total_price <= 0:
         return JSONResponse(content={"fulfillmentText": "Error calculating total price or no items found in the order.", "session_id": session_id})
 
+    # Trả về kết quả với fulfillmentText bao gồm order_id
+    fulfillment_text = f"Your order with ID {order_id} has been completed. The total price is {total_price} VND. Thank you for your order!"
+    
+
     # Lưu tổng tiền và các món ăn vào cơ sở dữ liệu
     db_helper.save_to_db(order_id, total_price, order_items)
+
 
     # Xóa đơn hàng khỏi bộ nhớ tạm
     del progress_orders[session_id]
 
-    # Trả về kết quả với fulfillmentText bao gồm order_id
-    fulfillment_text = f"Your order with ID {order_id} has been completed. The total price is {total_price} VND. Thank you for your order!"
-    
     return JSONResponse(content={"fulfillmentText": fulfillment_text})
 
 
