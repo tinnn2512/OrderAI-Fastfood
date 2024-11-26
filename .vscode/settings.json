@@ -1,0 +1,10 @@
+{
+    "cSpell.words": [
+        "Dialogflow"
+    ],
+    "python.analysis.extraPaths": [
+        "./Backend",
+        "./Models",
+        "./Backend/Models"
+    ]
+}
