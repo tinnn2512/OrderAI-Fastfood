@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Tracking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2.5rem;
+            color: #343a40;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            font-size: 1.1rem;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .btn-refresh {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 20px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-refresh:hover {
+            background-color: #218838;
+        }
+
+        .loading {
+            display: block;
+            margin: 30px auto;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #007bff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Order Tracking</h1>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Status</th>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Total Price</th>
+                    </tr>
+                </thead>
+                <tbody id="order-table-body">
+                    <!-- Dữ liệu sẽ được chèn vào đây từ JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="loading" class="loading"></div>
+        <a href="#" class="btn-refresh" onclick="window.location.reload()">Refresh Data</a>
+    </div>
+
+    <script>
+        // Ẩn bảng và hiển thị loading spinner khi đang tải dữ liệu
+        document.getElementById('loading').style.display = 'block';
+        document.querySelector('table').style.display = 'none';
+
+        // Fetch data from FastAPI backend
+        fetch('http://localhost:8000/api/order-tracking/')
+            .then(response => response.json())
+            .then(data => {
+                const orders = data.orders;  // Dữ liệu đơn hàng từ API
+                const tableBody = document.getElementById('order-table-body');
+                const loadingSpinner = document.getElementById('loading');
+                
+                // Ẩn spinner và hiển thị bảng sau khi có dữ liệu
+                loadingSpinner.style.display = 'none';
+                document.querySelector('table').style.display = 'table';
+
+                // Lặp qua từng đơn hàng và tạo các dòng trong bảng
+                orders.forEach(order => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${order[0]}</td>    <!-- Order ID -->
+                        <td>${order[1]}</td>    <!-- Status -->
+                        <td>${order[2]}</td>    <!-- Item -->
+                        <td>${order[3]}</td>    <!-- Quantity -->
+                        <td>${order[4]}</td>    <!-- Total Price -->
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                document.getElementById('loading').innerHTML = "Failed to load data";
+            });
+    </script>
+</body>
+</html>

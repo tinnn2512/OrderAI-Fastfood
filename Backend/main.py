@@ -1,10 +1,17 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 import  db_helper
 import generic_helper
+from fastapi.templating import Jinja2Templates
+from middleware.cors_middleware import add_cors_middleware
+
 
 
 app = FastAPI()
+
+templates = Jinja2Templates(directory="templates")
+
+add_cors_middleware(app)
 
 # Khai báo biến toàn cục cho các đơn hàng đang xử lý
 progress_orders = {}
@@ -186,6 +193,13 @@ def track_order(parameters: dict, session_id: str):
 
 
 
+@app.get("/api/order-tracking/")
+async def order_tracking():
+    # Gọi hàm fetch_order_details từ db_helper để lấy dữ liệu từ DB
+    orders = db_helper.fetch_order_details()
+    if orders is None:
+        return {"error": "Failed to fetch order details"}
+    return {"orders": orders}
 
 
 
