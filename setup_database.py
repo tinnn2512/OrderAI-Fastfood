@@ -1,7 +1,8 @@
 import sqlite3
 
 # Kết nối hoặc tạo cơ sở dữ liệu
-conn = sqlite3.connect('database/FastFoodAI.db')
+
+conn = sqlite3.connect('/database/FastFoodAI.db')
 cursor = conn.cursor()
 
 # Tạo bảng food_items

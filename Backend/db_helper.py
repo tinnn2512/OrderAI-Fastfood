@@ -1,7 +1,7 @@
 import sqlite3
 
 # Đường dẫn đến SQLite database
-db_path = r'F:\PYTHON CODE\AIProject\database\FastFoodAI.db'
+db_path = r'F:\PYTHON CODE\OrderAI-Fastfood\OrderAI-Fastfood\database\FastFoodAI.db'
 
 def get_order_status(order_id: int):
     """Lấy trạng thái đơn hàng."""
@@ -36,11 +36,10 @@ def get_next_order_id():
         return -1
 
 def get_item_id_by_name(food_item: str):
-    """Lấy ID món ăn theo tên."""
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        cursor.execute("SELECT item_id FROM food_items WHERE name = ?", (food_item,))
+        cursor.execute("SELECT item_id FROM food_items WHERE LOWER(name) = ?", (food_item.lower(),))
         result = cursor.fetchone()
         conn.close()
         return result[0] if result else None

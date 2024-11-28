@@ -82,45 +82,42 @@ def remove_from_order(parameters: dict, session_id: str):
         return JSONResponse(content={
             "fulfillmentText": "I'm having trouble finding your order. Can you place a new order, please?"
         })
-    
-    # Lấy thông tin món ăn và số lượng từ parameters
+
     food_items = parameters.get("food-items", [])
     quantity = parameters.get("number", 0)
-    current_order = progress_orders[session_id]
+    current_order = progress_orders.get(session_id, {})
 
-    removed_items = []
-    no_such_items = []
+    items_removed = []
+    items_not_found = []
 
-    for item in food_items:
-        item_lower = item.lower()  # So sánh không phân biệt chữ hoa/thường
-        matching_item = next((key for key in current_order.keys() if key.lower() == item_lower), None)
+    for food_item in food_items:
+        item_key = next((key for key in current_order.keys() if key.lower() == food_item.lower()), None)
 
-        if matching_item:
-            if quantity >= current_order[matching_item]:  # Nếu số lượng cần xóa >= số lượng trong order
-                del current_order[matching_item]
-                removed_items.append(item)
+        if item_key:
+            if quantity >= current_order.get(item_key, 0):
+                del current_order[item_key]
+                items_removed.append(food_item)
             else:
-                current_order[matching_item] -= quantity  # Giảm số lượng
-                removed_items.append(f"{quantity} x {item}")
+                current_order[item_key] -= quantity
+                items_removed.append(f"{quantity} x {food_item}")
         else:
-            no_such_items.append(item)
+            items_not_found.append(food_item)
 
-    # Tạo phản hồi
-    fulfillment_text = ""
-    if removed_items:
-        fulfillment_text += f"Removed {', '.join(removed_items)} from your order. "
+    response_message = ""
+    if items_removed:
+        response_message += f"Removed {', '.join(items_removed)} from your order. "
 
-    if no_such_items:
-        fulfillment_text += f"Your current order does not include {', '.join(no_such_items)}. "
+    if items_not_found:
+        response_message += f"Your current order does not include {', '.join(items_not_found)}. "
 
-    if not current_order:  # Nếu đơn hàng trống
-        fulfillment_text += "Your order is now empty!"
-        del progress_orders[session_id]
+    if not current_order:
+        response_message += "Your order is now empty!"
+        progress_orders.pop(session_id, None)
     else:
-        order_str = generic_helper.get_str_from_food_dict(current_order)
-        fulfillment_text += f"Here is what remains in your order: {order_str}."
+        order_summary = generic_helper.get_str_from_food_dict(current_order)
+        response_message += f"Here is what remains in your order: {order_summary}."
 
-    return JSONResponse(content={"fulfillmentText": fulfillment_text})
+    return JSONResponse(content={"fulfillmentText": response_message})
 
 
     
